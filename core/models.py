@@ -5,7 +5,7 @@ from django.conf import settings
 class Subject(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    is_published = models.BooleanField()
+    is_published = models.BooleanField(default=False)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subjects"
     )
@@ -16,7 +16,7 @@ class Subject(models.Model):
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    is_published = models.BooleanField()
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     subject = models.ForeignKey(
@@ -30,7 +30,7 @@ class Course(models.Model):
 class Module(models.Model):
     title = models.CharField(max_length=255)
     duration = models.IntegerField()  # in minutes
-    is_published = models.BooleanField()
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="modules")
@@ -41,6 +41,7 @@ class Module(models.Model):
 
 class Content(models.Model):
     content = models.TextField()
+    is_published = models.BooleanField(default=False)
     type = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
