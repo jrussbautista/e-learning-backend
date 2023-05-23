@@ -3,6 +3,22 @@ from users.factories import UserFactory
 from elearning.factories import SubjectFactory
 
 
+class ViewSubjectTests(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.client.force_authenticate(user=self.user)
+        self.subject = SubjectFactory(
+            author=self.user, is_published=True, title="subject 1", description="desc 1"
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def get_subject_details_by_id(self):
+        response = self.client.get(f"/subjects/{self.subject.id}/")
+        details = response.json()
+        self.assertEqual(details.id, self.subject.id)
+        self.assertEqual(details.title, self.subject.title)
+
+
 class SubjectsFilterTests(APITestCase):
     def setUp(self):
         self.user = UserFactory()

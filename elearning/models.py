@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from .constants import CourseStatus
 
 
 class Subject(models.Model):
@@ -16,7 +17,11 @@ class Subject(models.Model):
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    is_published = models.BooleanField(default=False)
+    status = models.CharField(
+        choices=CourseStatus.choices,
+        default=CourseStatus.DRAFT,
+        max_length=100,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     subject = models.ForeignKey(
