@@ -1,22 +1,39 @@
 from rest_framework.test import APITestCase
+from rest_framework.status import HTTP_404_NOT_FOUND
 from users.factories import UserFactory
 from elearning.factories import SubjectFactory
 
 
-class ViewSubjectTests(APITestCase):
+class ViewSubjectsTests(APITestCase):
     def setUp(self):
         self.user = UserFactory()
+        self.user_1 = UserFactory()
         self.client.force_authenticate(user=self.user)
-        self.subject = SubjectFactory(
+        self.subject_1 = SubjectFactory(
             author=self.user, is_published=True, title="subject 1", description="desc 1"
+        )
+        self.subject_2 =  SubjectFactory(
+            author=self.user_1, is_published=True, title="subject 2", description="desc 2"
         )
         self.client.force_authenticate(user=self.user)
 
-    def get_subject_details_by_id(self):
-        response = self.client.get(f"/subjects/{self.subject.id}/")
-        details = response.json()
-        self.assertEqual(details.id, self.subject.id)
-        self.assertEqual(details.title, self.subject.title)
+    def test_can_only_view_owned_subjects(self):
+        response = self.client.get("/subjects/")
+        results = response.json()["results"]
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["id"], self.subject_1.id)
+
+    def test_can_only_view_owned_subject(self):
+        response = self.client.get(f"/subjects/{self.subject_1.id}/")
+        data = response.json()
+        self.assertEqual(data["id"], self.subject_1.id)
+        self.assertEqual(data["title"], self.subject_1.title)
+
+    def test_cannot_view_not_owned_subject(self):
+        subject_by_someone = SubjectFactory()
+        response = self.client.get(f"/subjects/{subject_by_someone.id}/")
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
 
 
 class SubjectsFilterTests(APITestCase):

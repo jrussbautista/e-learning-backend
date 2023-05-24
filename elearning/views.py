@@ -8,8 +8,8 @@ from .pagination import DefaultPagination
 from .filters import SubjectFilter
 
 
+
 class SubjectViewSet(ModelViewSet):
-    queryset = Subject.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = SubjectSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
@@ -18,3 +18,7 @@ class SubjectViewSet(ModelViewSet):
     search_fields = ["title", "description"]
     ordering_fields = ["created_at", "title", "is_published"]
     search_fields = ["title", "description"]
+
+    def get_queryset(self):
+        queryset = Subject.objects.filter(author=self.request.user)
+        return queryset
