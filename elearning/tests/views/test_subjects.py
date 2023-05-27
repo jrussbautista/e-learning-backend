@@ -1,5 +1,5 @@
 from rest_framework.test import APITestCase
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_200_OK
 from users.factories import UserFactory
 from elearning.factories import SubjectFactory
 
@@ -91,7 +91,7 @@ class SubjectsFilterTests(APITestCase):
         results = response.json()["results"]
         self.assertEqual(results[0]["id"], self.subject_3.id)
 
-class CreateSubjectTests(APITestCase):
+class ManageSubjectTests(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.client.force_authenticate(user=self.user)
@@ -105,3 +105,23 @@ class CreateSubjectTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_201_CREATED)
         self.assertEqual(response.json()["title"], payload["title"])
         self.assertEqual(response.json()["description"], payload["description"])
+
+    def test_author_can_update_its_own_subject(self):
+        subject = SubjectFactory(author=self.user)
+        payload = {
+            "title": "Update Test subject",
+            "description": "updated test description"
+        }
+        response = self.client.patch(f'/subjects/{subject.id}/', payload)
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.json()["title"], payload["title"])
+        self.assertEqual(response.json()["description"], payload["description"])
+
+    def test_author_cannot_update_subject_by_other_author(self):
+        subject_by_other = SubjectFactory()
+        payload = {
+            "title": "Update Test subject",
+            "description": "updated test description"
+        }
+        response = self.client.patch(f'/subjects/{subject_by_other.id}/', payload)
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
