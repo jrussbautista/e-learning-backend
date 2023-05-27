@@ -1,5 +1,5 @@
 from rest_framework.test import APITestCase
-from rest_framework.status import HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from users.factories import UserFactory
 from elearning.factories import SubjectFactory
 
@@ -90,3 +90,18 @@ class SubjectsFilterTests(APITestCase):
         response = self.client.get("/subjects/?ordering=-title")
         results = response.json()["results"]
         self.assertEqual(results[0]["id"], self.subject_3.id)
+
+class CreateSubjectTests(APITestCase):
+    def setUp(self):
+        self.user = UserFactory()
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_subject(self):
+        payload = {
+            "title": "Test subject",
+            "description": "test description"
+        }
+        response = self.client.post('/subjects/', payload)
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertEqual(response.json()["title"], payload["title"])
+        self.assertEqual(response.json()["description"], payload["description"])

@@ -3,7 +3,7 @@ from users.serializers import UserSerializer
 from .models import Subject
 
 
-class SubjectSerializer(serializers.ModelSerializer):
+class SubjectReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
         fields = [
@@ -17,3 +17,13 @@ class SubjectSerializer(serializers.ModelSerializer):
         ]
 
     author = UserSerializer()
+
+class SubjectWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = [
+            "id",
+            "title",
+            "description",
+            "is_published",
+        ]
