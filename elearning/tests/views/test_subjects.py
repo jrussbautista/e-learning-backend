@@ -1,8 +1,8 @@
 from rest_framework.test import APITestCase
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_200_OK
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED, HTTP_200_OK, HTTP_204_NO_CONTENT
 from users.factories import UserFactory
 from elearning.factories import SubjectFactory
-
+from elearning.models import Subject
 
 class ViewSubjectsTests(APITestCase):
     def setUp(self):
@@ -125,3 +125,11 @@ class ManageSubjectTests(APITestCase):
         }
         response = self.client.patch(f'/subjects/{subject_by_other.id}/', payload)
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_author_can_delete_its_own_subject(self):
+        subject = SubjectFactory(author=self.user)
+        response = self.client.delete(f'/subjects/{subject.id}/')
+        self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
+
+        subject = Subject.objects.filter(id=subject.id).first()
+        self.assertIsNone(subject)
