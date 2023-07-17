@@ -1,29 +1,22 @@
 from rest_framework import serializers
 from users.serializers import UserSerializer
-from .models import Subject
+from .models import Category
 
 
-class SubjectReadSerializer(serializers.ModelSerializer):
+class CategoryReadSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Subject
-        fields = [
-            "id",
-            "title",
-            "description",
-            "is_published",
-            "created_at",
-            "updated_at",
-            "author",
-        ]
+        model = Category
+        fields = ["id", "title", "description", "is_active", "created_at", "updated_at"]
 
     author = UserSerializer()
 
-class SubjectWriteSerializer(serializers.ModelSerializer):
+
+class CategoryWriteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Subject
+        model = Category
         fields = [
             "id",
             "title",
             "description",
-            "is_published",
+            "is_active",
         ]

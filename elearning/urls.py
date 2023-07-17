@@ -1,8 +1,8 @@
 from rest_framework_nested import routers
-from .views import SubjectViewSet
+from .views import CategoryViewSet
 
 
 router = routers.DefaultRouter()
-router.register("subjects", SubjectViewSet, basename="subjects")
+router.register("categories", CategoryViewSet, basename="categories")
 
 urlpatterns = router.urls

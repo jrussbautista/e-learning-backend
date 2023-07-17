@@ -1,19 +1,18 @@
 import factory
 from faker import Factory
 from users.factories import UserFactory
-from .models import Subject, Course
+from .models import Category, Course
 
 
 faker = Factory.create()
 
 
-class SubjectFactory(factory.django.DjangoModelFactory):
+class CategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Subject
+        model = Category
 
     title = factory.LazyAttribute(lambda _: faker.paragraph(nb_sentences=1))
     description = factory.LazyAttribute(lambda _: faker.paragraph(nb_sentences=5))
-    author = factory.SubFactory(UserFactory)
 
 
 class CourseFactory(factory.django.DjangoModelFactory):
@@ -22,5 +21,5 @@ class CourseFactory(factory.django.DjangoModelFactory):
 
     title = factory.LazyAttribute(lambda _: faker.paragraph(nb_sentences=1))
     description = factory.LazyAttribute(lambda _: faker.paragraph(nb_sentences=5))
-    subject = factory.SubFactory(SubjectFactory)
+    category = factory.SubFactory(CategoryFactory)
     author = factory.SubFactory(UserFactory)
