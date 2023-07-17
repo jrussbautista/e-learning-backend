@@ -1,5 +1,5 @@
 from rest_framework_nested import routers
-from .views import CategoryViewSet
+from elearning.views.category import CategoryViewSet
 
 
 router = routers.DefaultRouter()

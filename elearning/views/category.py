@@ -2,10 +2,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from drf_rw_serializers.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from .models import Category
-from .serializers import CategoryReadSerializer, CategoryWriteSerializer
-from .pagination import DefaultPagination
-from .filters import CategoryFilter
+from elearning.models import Category
+from elearning.serializers.category import (
+    CategoryReadSerializer,
+    CategoryWriteSerializer,
+)
+from elearning.pagination import DefaultPagination
+from elearning.filters import CategoryFilter
 
 
 class CategoryViewSet(ModelViewSet):
