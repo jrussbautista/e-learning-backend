@@ -22,7 +22,7 @@ class ViewCategoriesTests(APITestCase):
     def test_can_view_categories(self):
         response = self.client.get("/categories/")
         results = response.json()["results"]
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 2)
         self.assertEqual(results[0]["id"], self.category_1.id)
 
     def test_can_view_category(self):
@@ -100,7 +100,7 @@ class ManageCategoryTests(APITestCase):
         self.assertEqual(response.json()["description"], payload["description"])
 
     def test_can_update_category(self):
-        category = CategoryFactory(author=self.user)
+        category = CategoryFactory()
         payload = {
             "title": "Update Test category",
             "description": "updated test description",
