@@ -16,7 +16,7 @@ class Course(models.Model):
     description = models.TextField()
     status = models.CharField(
         choices=CourseStatus.choices,
-        default=CourseStatus.DRAFT,
+        default=CourseStatus.FOR_REVIEW,
         max_length=100,
     )
     created_at = models.DateTimeField(auto_now_add=True)
