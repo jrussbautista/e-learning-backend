@@ -109,3 +109,14 @@ class ManageCourseTests(APITestCase):
         }
         response = self.client.patch(f"/courses/{course.id}/", payload)
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_instructor_can_mark_the_course_as_draft(self):
+        course = CourseFactory(instructor=self.user)
+        response = self.client.post(f"/courses/{course.id}/mark-as-draft/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.json()["status"], CourseStatus.DRAFT)
+
+    def test_instructor_cannot_mark_not_owned_course_as_draft(self):
+        course = CourseFactory()
+        response = self.client.post(f"/courses/{course.id}/mark-as-draft/")
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)

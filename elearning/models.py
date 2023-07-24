@@ -28,6 +28,10 @@ class Course(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="courses"
     )
 
+    def mark_as_draft(self):
+        self.status = CourseStatus.DRAFT
+        self.save()
+
 
 class Lesson(models.Model):
     title = models.CharField(max_length=255)
