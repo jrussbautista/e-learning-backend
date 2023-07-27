@@ -7,13 +7,27 @@ from rest_framework.status import (
 )
 from elearning.factories import UserFactory, CategoryFactory, CourseFactory
 from elearning.constants import CourseStatus
+from users.constants import UserRole
 
 
-class ViewCoursesTests(APITestCase):
+class AdminViewCoursesTests(APITestCase):
     def setUp(self):
-        self.user = UserFactory()
-        self.client.force_authenticate(user=self.user)
+        self.admin = UserFactory(role=UserRole.ADMIN)
+        self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
+        CourseFactory(instructor=self.instructor)
+        CourseFactory(instructor=self.instructor)
+        self.client.force_authenticate(user=self.admin)
 
+    def test_admin_can_view_all_courses(self):
+        response = self.client.get("/courses/")
+        results = response.json()["results"]
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(len(results), 2)
+
+
+class InstructorViewCoursesTests(APITestCase):
+    def setUp(self):
+        self.user = UserFactory(role=UserRole.INSTRUCTOR)
         self.client.force_authenticate(user=self.user)
 
     def test_instructor_can_view_its_owned_courses(self):
@@ -53,7 +67,7 @@ class ViewCoursesTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
 
-class ManageCourseTests(APITestCase):
+class InstructorManageCourseTests(APITestCase):
     def setUp(self):
         self.user = UserFactory()
         self.client.force_authenticate(user=self.user)
