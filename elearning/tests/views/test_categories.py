@@ -5,6 +5,7 @@ from rest_framework.status import (
 )
 from users.factories import UserFactory
 from elearning.factories import CategoryFactory
+from users.constants import UserRole
 
 
 class ViewCategoriesTests(APITestCase):
@@ -89,8 +90,8 @@ class CategoriesFilterTests(APITestCase):
 
 class ManageCategoryTests(APITestCase):
     def setUp(self):
-        self.user = UserFactory()
-        self.client.force_authenticate(user=self.user)
+        self.admin = UserFactory(role=UserRole.ADMIN)
+        self.client.force_authenticate(user=self.admin)
 
     def test_create_category(self):
         payload = {"title": "Test category", "description": "test description"}

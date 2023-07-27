@@ -27,15 +27,15 @@ class AdminViewCoursesTests(APITestCase):
 
 class InstructorViewCoursesTests(APITestCase):
     def setUp(self):
-        self.user = UserFactory(role=UserRole.INSTRUCTOR)
-        self.client.force_authenticate(user=self.user)
+        self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
+        self.client.force_authenticate(user=self.instructor)
 
     def test_instructor_can_view_its_owned_courses(self):
         course_1 = CourseFactory(
-            title="title 1", description="desc 1", instructor=self.user
+            title="title 1", description="desc 1", instructor=self.instructor
         )
         course_2 = CourseFactory(
-            title="title 2", description="desc 2", instructor=self.user
+            title="title 2", description="desc 2", instructor=self.instructor
         )
         response = self.client.get("/courses/")
         results = response.json()["results"]
@@ -45,7 +45,7 @@ class InstructorViewCoursesTests(APITestCase):
         self.assertEqual(results[1]["id"], course_2.id)
 
     def test_instructor_cannot_view_not_owned_courses(self):
-        owned_course = CourseFactory(instructor=self.user)
+        owned_course = CourseFactory(instructor=self.instructor)
         not_owned_course = CourseFactory()
         response = self.client.get("/courses/")
         results = response.json()["results"]
@@ -54,7 +54,7 @@ class InstructorViewCoursesTests(APITestCase):
         self.assertEqual(results[0]["id"], owned_course.id)
 
     def test_instructor_can_view_its_owned_course(self):
-        owned_course = CourseFactory(instructor=self.user)
+        owned_course = CourseFactory(instructor=self.instructor)
         response = self.client.get(f"/courses/{owned_course.id}/")
         data = response.json()
         self.assertEqual(response.status_code, HTTP_200_OK)
@@ -69,8 +69,8 @@ class InstructorViewCoursesTests(APITestCase):
 
 class InstructorManageCourseTests(APITestCase):
     def setUp(self):
-        self.user = UserFactory()
-        self.client.force_authenticate(user=self.user)
+        self.instructor = UserFactory()
+        self.client.force_authenticate(user=self.instructor)
 
     def test_create_course(self):
         category = CategoryFactory()
@@ -105,7 +105,7 @@ class InstructorManageCourseTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
 
     def test_instructor_can_update_owned_courses(self):
-        course = CourseFactory(instructor=self.user)
+        course = CourseFactory(instructor=self.instructor)
         payload = {
             "title": "Updated course title",
             "description": "Update course description",
@@ -125,7 +125,7 @@ class InstructorManageCourseTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
     def test_instructor_can_mark_the_course_as_draft(self):
-        course = CourseFactory(instructor=self.user)
+        course = CourseFactory(instructor=self.instructor)
         response = self.client.post(f"/courses/{course.id}/mark-as-draft/")
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json()["status"], CourseStatus.DRAFT)
