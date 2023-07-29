@@ -1,7 +1,13 @@
-
 from rest_framework import permissions
+from elearning.models import Course
 
 
-class IsOwner(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.user == obj.author
+class IsCourseOwner(permissions.BasePermission):
+    def has_permission(self, request, view):
+        course = request.data.get("course")
+        if course:
+            is_course_own = Course.objects.filter(
+                id=course, instructor=request.user
+            ).exists()
+            return is_course_own
+        return True

@@ -26,9 +26,9 @@ class CourseViewSet(ModelViewSet):
     search_fields = ["title", "description"]
 
     def get_queryset(self):
-        if self.request.user and self.request.user.role == UserRole.ADMIN:
-            return Course.objects.all()
-        return Course.objects.filter(instructor=self.request.user)
+        if self.request.user.role == UserRole.INSTRUCTOR:
+            return Course.objects.filter(instructor=self.request.user)
+        return Course.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(instructor=self.request.user)
