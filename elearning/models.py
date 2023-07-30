@@ -40,6 +40,14 @@ class Lesson(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="lessons")
 
+    def activate(self):
+        self.is_active = True
+        self.save()
+
+    def deactivate(self):
+        self.is_active = False
+        self.save()
+
 
 class Chapter(models.Model):
     content = models.TextField()

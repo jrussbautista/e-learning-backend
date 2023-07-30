@@ -69,7 +69,7 @@ class InstructorViewCoursesTests(APITestCase):
 
 class InstructorManageCourseTests(APITestCase):
     def setUp(self):
-        self.instructor = UserFactory()
+        self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
         self.client.force_authenticate(user=self.instructor)
 
     def test_create_course(self):

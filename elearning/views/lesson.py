@@ -2,6 +2,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from drf_rw_serializers.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from elearning.models import Lesson
 from elearning.serializers.lesson import (
     LessonReadSerializer,
@@ -33,4 +35,28 @@ class LessonViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.user.role == UserRole.INSTRUCTOR:
             return Lesson.objects.filter(course__instructor=self.request.user)
-        return Lesson.objects.all() 
+        return Lesson.objects.all()
+
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[IsAuthenticated],
+        url_path="activate",
+    )
+    def activate(self, request, pk=None):
+        lesson = self.get_object()
+        lesson.activate()
+        serializer = self.serializer_class(lesson)
+        return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[IsAuthenticated],
+        url_path="deactivate",
+    )
+    def deactivate(self, request, pk=None):
+        lesson = self.get_object()
+        lesson.deactivate()
+        serializer = self.serializer_class(lesson)
+        return Response(serializer.data)
