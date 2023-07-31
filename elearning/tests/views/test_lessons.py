@@ -12,6 +12,20 @@ from elearning.factories import UserFactory, CourseFactory, LessonFactory
 from users.constants import UserRole
 
 
+class AdminViewLessonsTests(APITestCase):
+    def setUp(self):
+        self.admin = UserFactory(role=UserRole.ADMIN)
+        self.lesson_1 = LessonFactory()
+        self.lesson_2 = LessonFactory()
+        self.client.force_authenticate(user=self.admin)
+
+    def test_admin_can_view_all_lessons(self):
+        response = self.client.get("/lessons/")
+        results = response.json()["results"]
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(len(results), 2)
+
+
 class InstructorViewLessonsTests(APITestCase):
     def setUp(self):
         self.instructor = UserFactory(role=UserRole.INSTRUCTOR)

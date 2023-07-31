@@ -14,8 +14,8 @@ class AdminViewCoursesTests(APITestCase):
     def setUp(self):
         self.admin = UserFactory(role=UserRole.ADMIN)
         self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
-        CourseFactory(instructor=self.instructor)
-        CourseFactory(instructor=self.instructor)
+        self.course_1 = CourseFactory(instructor=self.instructor)
+        self.course_2 = CourseFactory(instructor=self.instructor)
         self.client.force_authenticate(user=self.admin)
 
     def test_admin_can_view_all_courses(self):
@@ -23,6 +23,21 @@ class AdminViewCoursesTests(APITestCase):
         results = response.json()["results"]
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(len(results), 2)
+
+
+class AdminManageCoursesTests(APITestCase):
+    def setUp(self):
+        self.admin = UserFactory(role=UserRole.ADMIN)
+        self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
+        self.course_1 = CourseFactory(instructor=self.instructor)
+        self.course_2 = CourseFactory(instructor=self.instructor)
+        self.client.force_authenticate(user=self.admin)
+
+    def test_admin_can_mark_the_course_as_active(self):
+        response = self.client.get("/courses/")
+        response = self.client.post(f"/courses/{self.course_1.id}/mark-as-active/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.json()["status"], CourseStatus.ACTIVE)
 
 
 class InstructorViewCoursesTests(APITestCase):
@@ -134,3 +149,9 @@ class InstructorManageCourseTests(APITestCase):
         course = CourseFactory()
         response = self.client.post(f"/courses/{course.id}/mark-as-draft/")
         self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
+
+    def test_instructor_can_mark_the_course_as_for_review(self):
+        course = CourseFactory(instructor=self.instructor)
+        response = self.client.post(f"/courses/{course.id}/mark-as-for-review/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.json()["status"], CourseStatus.FOR_REVIEW)

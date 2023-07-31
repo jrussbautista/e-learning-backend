@@ -32,6 +32,14 @@ class Course(models.Model):
         self.status = CourseStatus.DRAFT
         self.save()
 
+    def mark_as_for_review(self):
+        self.status = CourseStatus.FOR_REVIEW
+        self.save()
+
+    def mark_as_active(self):
+        self.status = CourseStatus.ACTIVE
+        self.save()
+
 
 class Lesson(models.Model):
     title = models.CharField(max_length=255)

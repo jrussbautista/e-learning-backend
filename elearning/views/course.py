@@ -44,3 +44,27 @@ class CourseViewSet(ModelViewSet):
         course.mark_as_draft()
         serializer = self.serializer_class(course)
         return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[IsAuthenticated],
+        url_path="mark-as-for-review",
+    )
+    def mark_as_for_review(self, request, pk=None):
+        course = self.get_object()
+        course.mark_as_for_review()
+        serializer = self.serializer_class(course)
+        return Response(serializer.data)
+
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[IsAuthenticated],
+        url_path="mark-as-active",
+    )
+    def mark_as_active(self, request, pk=None):
+        course = self.get_object()
+        course.mark_as_active()
+        serializer = self.serializer_class(course)
+        return Response(serializer.data)
