@@ -12,7 +12,7 @@ from elearning.factories import UserFactory, CourseFactory, LessonFactory
 from users.constants import UserRole
 
 
-class InstructorViewCoursesTests(APITestCase):
+class InstructorViewLessonsTests(APITestCase):
     def setUp(self):
         self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
         self.client.force_authenticate(user=self.instructor)
@@ -28,7 +28,7 @@ class InstructorViewCoursesTests(APITestCase):
         self.assertEqual(results[0]["id"], lesson_1.id)
         self.assertEqual(results[1]["id"], lesson_2.id)
 
-    def test_instructor_can_view_its_owned_lessons(self):
+    def test_instructor_cannot_view_its_owned_lessons(self):
         course = CourseFactory()  # not owned course by current user
         LessonFactory(title="title 1", course=course)
         LessonFactory(title="title 2", course=course)
@@ -36,6 +36,20 @@ class InstructorViewCoursesTests(APITestCase):
         results = response.json()["results"]
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(len(results), 0)
+
+    def test_instructor_can_view_its_owned_lesson(self):
+        owned_course = CourseFactory(instructor=self.instructor)
+        lesson = LessonFactory(course=owned_course)
+        response = self.client.get(f"/lessons/{lesson.id}/")
+        data = response.json()
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(data["id"], lesson.id)
+        self.assertEqual(data["title"], lesson.title)
+
+    def test_instructor_cannot_view_not_owned_lesson(self):
+        lesson = LessonFactory()
+        response = self.client.get(f"/lessons/{lesson.id}/")
+        self.assertEqual(response.status_code, HTTP_404_NOT_FOUND)
 
 
 class InstructorManageLessonTests(APITestCase):
