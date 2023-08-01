@@ -1,8 +1,5 @@
 from rest_framework.test import APITestCase
-from rest_framework.status import (
-    HTTP_201_CREATED,
-    HTTP_200_OK,
-)
+from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_403_FORBIDDEN
 from users.factories import UserFactory
 from elearning.factories import CategoryFactory
 from users.constants import UserRole
@@ -88,7 +85,7 @@ class CategoriesFilterTests(APITestCase):
         self.assertEqual(results[0]["id"], self.category_3.id)
 
 
-class ManageCategoryTests(APITestCase):
+class AdminManageCategoryTests(APITestCase):
     def setUp(self):
         self.admin = UserFactory(role=UserRole.ADMIN)
         self.client.force_authenticate(user=self.admin)
@@ -100,6 +97,13 @@ class ManageCategoryTests(APITestCase):
         self.assertEqual(response.json()["title"], payload["title"])
         self.assertEqual(response.json()["description"], payload["description"])
 
+    def test_non_admin_cannot_create_category(self):
+        instructor = UserFactory(role=UserRole.INSTRUCTOR)
+        self.client.force_authenticate(user=instructor)
+        payload = {"title": "Test category", "description": "test description"}
+        response = self.client.post("/categories/", payload)
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+
     def test_can_update_category(self):
         category = CategoryFactory()
         payload = {
@@ -110,3 +114,14 @@ class ManageCategoryTests(APITestCase):
         self.assertEqual(response.status_code, HTTP_200_OK)
         self.assertEqual(response.json()["title"], payload["title"])
         self.assertEqual(response.json()["description"], payload["description"])
+
+    def test_non_admin_cannot_update_category(self):
+        instructor = UserFactory(role=UserRole.INSTRUCTOR)
+        self.client.force_authenticate(user=instructor)
+        category = CategoryFactory()
+        payload = {
+            "title": "Update Test category",
+            "description": "updated test description",
+        }
+        response = self.client.patch(f"/categories/{category.id}/", payload)
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
