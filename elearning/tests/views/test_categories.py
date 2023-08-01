@@ -88,7 +88,11 @@ class CategoriesFilterTests(APITestCase):
 class AdminManageCategoryTests(APITestCase):
     def setUp(self):
         self.admin = UserFactory(role=UserRole.ADMIN)
-        self.client.force_authenticate(user=self.admin)
+        self.instructor = UserFactory(role=UserRole.INSTRUCTOR)
+        self.loggedIn(user=self.admin)
+
+    def loggedIn(self, user):
+        self.client.force_authenticate(user=user)
 
     def test_create_category(self):
         payload = {"title": "Test category", "description": "test description"}
@@ -98,8 +102,7 @@ class AdminManageCategoryTests(APITestCase):
         self.assertEqual(response.json()["description"], payload["description"])
 
     def test_non_admin_cannot_create_category(self):
-        instructor = UserFactory(role=UserRole.INSTRUCTOR)
-        self.client.force_authenticate(user=instructor)
+        self.loggedIn(user=self.instructor)
         payload = {"title": "Test category", "description": "test description"}
         response = self.client.post("/categories/", payload)
         self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
@@ -116,8 +119,7 @@ class AdminManageCategoryTests(APITestCase):
         self.assertEqual(response.json()["description"], payload["description"])
 
     def test_non_admin_cannot_update_category(self):
-        instructor = UserFactory(role=UserRole.INSTRUCTOR)
-        self.client.force_authenticate(user=instructor)
+        self.loggedIn(user=self.instructor)
         category = CategoryFactory()
         payload = {
             "title": "Update Test category",
@@ -125,3 +127,35 @@ class AdminManageCategoryTests(APITestCase):
         }
         response = self.client.patch(f"/categories/{category.id}/", payload)
         self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+
+    def test_admin_can_activate_category(self):
+        category = CategoryFactory(is_active=False)
+        response = self.client.post(f"/categories/{category.id}/activate/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertTrue(response.json()["is_active"])
+        category.refresh_from_db()
+        self.assertTrue(category.is_active)
+
+    def test_non_admin_cannot_activate_category(self):
+        self.loggedIn(user=self.instructor)
+        category = CategoryFactory(is_active=False)
+        response = self.client.post(f"/categories/{category.id}/activate/")
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        category.refresh_from_db()
+        self.assertFalse(category.is_active)
+
+    def test_admin_can_deactivate_category(self):
+        category = CategoryFactory(is_active=True)
+        response = self.client.post(f"/categories/{category.id}/deactivate/")
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertFalse(response.json()["is_active"])
+        category.refresh_from_db()
+        self.assertFalse(category.is_active)
+
+    def test_non_admin_cannot_deactivate_category(self):
+        self.loggedIn(user=self.instructor)
+        category = CategoryFactory(is_active=True)
+        response = self.client.post(f"/categories/{category.id}/deactivate/")
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        category.refresh_from_db()
+        self.assertTrue(category.is_active)
